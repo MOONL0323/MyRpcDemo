@@ -16,7 +16,7 @@
 
 ### 框架图：
 
-![v1-框架图](.\readme_picture\v1框架图.png)
+![v1-框架图](./readme_picture/v1框架图.png)
 
 这次我们对客户端和服务端进行了封装，提供序列化反序列化。消息的格式也进行了封装，底层采用BIO进行传输，用户在调用过程中是感觉不到的，看起来就像是直接调用了服务端的方法一样。
 
@@ -155,7 +155,7 @@ public class IOService {
 
 注意这句话：
 
-![v1-1](.\readme_picture\v1-1.png)
+![v1-1](./readme_picture/v1-1.png)
 
 其实就是框架图中的返回给上层，然后上层调用方法之后返回结果给IO层。所以这代码应该叫做RPCService，因为实际包含了两层的内容
 
@@ -300,11 +300,9 @@ public class RpcClient {
 
 ### 结果：
 
-![v1-2](.\readme_picture\v1-2.png)
+![v1-2](./readme_picture/v1-2.png)
 
-<img src="G:\rpc_project\readme_picture\image-20240529161515070.png" alt="image-20240529161515070" style="zoom:200%;" /
-
-![v1-3](.\readme_picture\v1-3.png)
+![v1-3](./readme_picture/v1-3.png)
 
 ### 总结：
 
