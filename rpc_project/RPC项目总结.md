@@ -322,3 +322,129 @@ public class RpcClient {
 
 ---
 
+## 版本v2
+
+### 回顾问题：
+
+在版本v1中，我们的服务端代码耦合度太高，并且能调用什么接口的方法已经是写死的了，所以我们在版本v2中就要解决这个问题。
+
+### 需求：
+
+1.对服务端解耦，将IO运输和上层调用接口方法解耦开
+
+2.我们不写死接口方法在服务端中，我们让客户端可以选择多个接口方法。这个很简单，用map就能够解决。
+
+### 框架图：
+
+![v2-框架图](./readme_picture/v2-框架图.png)
+
+---
+
+### 前置知识：
+
+1.线程池  2.map
+
+---
+
+### 具体代码过程：
+
+我们还是从客户端开始，从最上层开始写起。
+
+首先，我们还是一样定义消息体格式：
+
+Request
+
+```java
+@Data
+@Builder
+public class Request implements Serializable {
+    private String interfaceName;
+    private String methodName;
+    private Object[] parameters;
+    private Class<?>[] parameterTypes;
+}
+```
+
+Responce
+
+```java
+@Data
+@Builder
+public class Response implements Serializable {
+    private int code;
+    private String message;
+    private Object data;
+
+    public static Response success(Object data) {
+        return Response.builder().code(200).message("success").data(data).build();
+    }
+
+    public static Response fail(String message) {
+        return Response.builder().code(500).message(message).build();
+    }
+
+}
+```
+
+还有公共的实体类：
+
+User
+
+```java
+@Data
+@Builder
+public class User implements Serializable {
+    private String name;
+    private String email;
+    private int age;
+
+}
+```
+
+当然，这个版本我们为了体现出可以灵活的调用不同的接口方法，我们再写一个实体类：
+
+Blog
+
+```java
+@Data
+@Builder
+public class Blog implements Serializable {
+    private String title;
+    private String content;
+    private User author;
+}
+```
+
+ok,以上就不多解释了，消息格式和版本v1是一样的，我们继续往下。
+
+---
+
+我们先从客户端入手，似乎和之前没有什么不同，还是发送request，接收responce，然后拆开来得到结果。所以我们先来写IOClient：
+
+IOClient
+
+```java
+@Data
+@Builder
+public class IOClient {
+    public static Response sendRequest(String ip, int port, Request request) throws IOException {
+        try{
+            Socket socket = new Socket(ip,port);
+            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+            oos.writeObject(request);
+            oos.flush();
+            System.out.println("Client send request: " + request);
+
+            Response response = (Response) ois.readObject();
+            System.out.println("Client receive response: " + response);
+            return response;
+        } catch (ClassNotFoundException e) {
+            System.out.println("Client receive response error");
+            throw new RuntimeException(e);
+        }
+
+    }
+}
+```
+
